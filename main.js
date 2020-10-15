@@ -129,6 +129,12 @@ class TwitchPS extends EventEmitter {
             case 'chat_moderator_actions':
               self._onModeratorAction(message);
               break;
+            case 'polls':
+              self._onPolls(message);
+              break;
+            case 'hype-train-events-v1':
+              self._onHypeTrain(message);
+              break;
           }
         } else if (message.type === 'RECONNECT') {
           self._reconnect();
@@ -660,6 +666,116 @@ class TwitchPS extends EventEmitter {
           created_by: message.data.message.data.created_by,
           created_by_user_id: message.data.message.data.created_by_user_id,
           blocked_term: message.data.message.data.args[0],
+        });
+        break;
+      default:
+        // Do Nothing
+    }
+  }
+
+  /**
+   * Handles Polls Message
+   * @param message - {object} - Message object received from pubsub-edge
+   * @param message.type - {string} - Type of message - Will always be 'MESSAGE' - Handled by _connect()
+   * @param message.data - {JSON} - JSON wrapper of topic/message fields
+   * @param message.data.topic - {string} - Topic that message pertains too - Will always be 'polls.<CHANNEL_ID>' - Handled by _connect()
+   * @param message.data.message - {JSON} - Parsed into JSON in _connect() - Originally received as string from Twitch
+   * @emits stream-up, stream-down, viewcount
+   *          stream-up -
+   *            JSON object -
+   *                      time - {integer} - Server time. RFC 3339 format
+   *                      channel_name - {string} - Channel name
+   *                      play_delay - {string} - Delay of stream
+   *          stream-down -
+   *            JSON object -
+   *                      time - {integer} - Server time. RFC 3339 format
+   *                      channel_name - {string} - Channel name
+   *          viewcount -
+   *            JSON object -
+   *                      time - {integer} - Server time. RFC 3339 format
+   *                      channel_name - {string} - Channel name
+   *                      viewers - {integer} - Number of viewers currently watching
+   */
+  _onPolls(message) {
+    switch (message.data.message.data.type) {
+      case 'POLL_CREATE':
+        this.emit('poll_create', {
+          poll_id: message.data.message.data.poll.poll_id,
+          owned_by: message.data.message.data.poll.owned_by,
+          created_by: message.data.message.data.poll.created_by,
+          title: message.data.message.data.poll.title,
+          started_at: message.data.message.data.poll.started_at,
+          ended_at: message.data.message.data.poll.ended_at,
+          ended_by: message.data.message.data.poll.ended_by,
+          duration: message.data.message.data.poll.duration,
+          settings: message.data.message.data.poll.settings,
+          choices: message.data.message.data.poll.choices,
+          votes: message.data.message.data.poll.votes,
+          total_voters: message.data.message.data.poll.tokens.total_voters,
+          remaining_duration: message.data.message.data.poll.tokens.remaining_duration_milliseconds,
+          top_contributor: message.data.message.data.poll.tokens.top_contributor,
+          top_bits_contributor: message.data.message.data.poll.tokens.top_bits_contributor,
+          top_points_contributor: message.data.message.data.poll.tokens.top_channel_points_contributor,
+        });
+        break;
+      case 'POLL_UPDATE':
+         this.emit('poll_update', {
+          poll_id: message.data.message.data.poll.poll_id,
+          owned_by: message.data.message.data.poll.owned_by,
+          created_by: message.data.message.data.poll.created_by,
+          title: message.data.message.data.poll.title,
+          started_at: message.data.message.data.poll.started_at,
+          ended_at: message.data.message.data.poll.ended_at,
+          ended_by: message.data.message.data.poll.ended_by,
+          duration: message.data.message.data.poll.duration,
+          settings: message.data.message.data.poll.settings,
+          choices: message.data.message.data.poll.choices,
+          votes: message.data.message.data.poll.votes,
+          total_voters: message.data.message.data.poll.tokens.total_voters,
+          remaining_duration: message.data.message.data.poll.tokens.remaining_duration_milliseconds,
+          top_contributor: message.data.message.data.poll.tokens.top_contributor,
+          top_bits_contributor: message.data.message.data.poll.tokens.top_bits_contributor,
+          top_points_contributor: message.data.message.data.poll.tokens.top_channel_points_contributor,
+        });
+        break;
+      case 'POLL_UPDATE':
+        this.emit('poll_update', {
+          poll_id: message.data.message.data.poll.poll_id,
+          owned_by: message.data.message.data.poll.owned_by,
+          created_by: message.data.message.data.poll.created_by,
+          title: message.data.message.data.poll.title,
+          started_at: message.data.message.data.poll.started_at,
+          ended_at: message.data.message.data.poll.ended_at,
+          ended_by: message.data.message.data.poll.ended_by,
+          duration: message.data.message.data.poll.duration,
+          settings: message.data.message.data.poll.settings,
+          choices: message.data.message.data.poll.choices,
+          votes: message.data.message.data.poll.votes,
+          total_voters: message.data.message.data.poll.tokens.total_voters,
+          remaining_duration: message.data.message.data.poll.tokens.remaining_duration_milliseconds,
+          top_contributor: message.data.message.data.poll.tokens.top_contributor,
+          top_bits_contributor: message.data.message.data.poll.tokens.top_bits_contributor,
+          top_points_contributor: message.data.message.data.poll.tokens.top_channel_points_contributor,
+        });
+        break;
+      case 'POLL_ARCHIVE':
+        this.emit('poll_archive', {
+          poll_id: message.data.message.data.poll.poll_id,
+          owned_by: message.data.message.data.poll.owned_by,
+          created_by: message.data.message.data.poll.created_by,
+          title: message.data.message.data.poll.title,
+          started_at: message.data.message.data.poll.started_at,
+          ended_at: message.data.message.data.poll.ended_at,
+          ended_by: message.data.message.data.poll.ended_by,
+          duration: message.data.message.data.poll.duration,
+          settings: message.data.message.data.poll.settings,
+          choices: message.data.message.data.poll.choices,
+          votes: message.data.message.data.poll.votes,
+          total_voters: message.data.message.data.poll.tokens.total_voters,
+          remaining_duration: message.data.message.data.poll.tokens.remaining_duration_milliseconds,
+          top_contributor: message.data.message.data.poll.tokens.top_contributor,
+          top_bits_contributor: message.data.message.data.poll.tokens.top_bits_contributor,
+          top_points_contributor: message.data.message.data.poll.tokens.top_channel_points_contributor,
         });
         break;
       default:
